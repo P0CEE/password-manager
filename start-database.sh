@@ -10,6 +10,7 @@
 # On Linux and macOS you can run this script directly - `./start-database.sh`
 
 DB_CONTAINER_NAME="password-manager-postgres"
+DB_NAME="password-manager"
 
 if ! [ -x "$(command -v docker)" ]; then
   echo -e "Docker is not installed. Please install docker and try again.\nDocker install guide: https://docs.docker.com/engine/install/"
@@ -23,12 +24,32 @@ fi
 
 if [ "$(docker ps -q -f name=$DB_CONTAINER_NAME)" ]; then
   echo "Database container '$DB_CONTAINER_NAME' already running"
+  
+  # Check if database exists, create if it doesn't
+  if ! docker exec -i "$DB_CONTAINER_NAME" psql -U postgres -t -c "SELECT 1 FROM pg_database WHERE datname='$DB_NAME'" | grep -q 1; then
+    echo "Creating database '$DB_NAME'..."
+    docker exec -i "$DB_CONTAINER_NAME" psql -U postgres -c "CREATE DATABASE \"$DB_NAME\";"
+    echo "Database '$DB_NAME' created."
+  else
+    echo "Database '$DB_NAME' already exists."
+  fi
+  
   exit 0
 fi
 
 if [ "$(docker ps -q -a -f name=$DB_CONTAINER_NAME)" ]; then
   docker start "$DB_CONTAINER_NAME"
   echo "Existing database container '$DB_CONTAINER_NAME' started"
+  
+  # Check if database exists, create if it doesn't
+  if ! docker exec -i "$DB_CONTAINER_NAME" psql -U postgres -t -c "SELECT 1 FROM pg_database WHERE datname='$DB_NAME'" | grep -q 1; then
+    echo "Creating database '$DB_NAME'..."
+    docker exec -i "$DB_CONTAINER_NAME" psql -U postgres -c "CREATE DATABASE \"$DB_NAME\";"
+    echo "Database '$DB_NAME' created."
+  else
+    echo "Database '$DB_NAME' already exists."
+  fi
+  
   exit 0
 fi
 
@@ -58,3 +79,12 @@ docker run -d \
   -e POSTGRES_DB=keyfile \
   -p "$DB_PORT":5432 \
   docker.io/postgres && echo "Database container '$DB_CONTAINER_NAME' was successfully created"
+
+# Wait for PostgreSQL to start
+echo "Waiting for PostgreSQL to start..."
+sleep 5
+
+# Create the application database
+echo "Creating database '$DB_NAME'..."
+docker exec -i "$DB_CONTAINER_NAME" psql -U postgres -c "CREATE DATABASE \"$DB_NAME\";"
+echo "Database '$DB_NAME' created."
