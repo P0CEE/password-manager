@@ -1,36 +1,31 @@
-{% extends "layouts/admin_base.html" %} {% block title %}Tableau de bord -
+{% extends "layouts/admin_base.html" %} {% block title %}Mes mots de passe -
 Password Manager{% endblock %} {% block content %}
-<div class="bg-white p-6 rounded-lg shadow-md">
-  <h2 class="text-xl font-semibold mb-4">Bienvenue, {{ session.username }}</h2>
-  <p class="mb-4">Voici un résumé de votre gestionnaire de mots de passe.</p>
-
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
-    <div class="bg-blue-50 p-4 rounded-lg shadow">
-      <h3 class="font-semibold text-lg mb-2">Mots de passe</h3>
-      <p class="text-3xl font-bold text-blue-600">0</p>
-      <p class="text-sm text-gray-600 mt-2">Mots de passe enregistrés</p>
-    </div>
-
-    <div class="bg-green-50 p-4 rounded-lg shadow">
-      <h3 class="font-semibold text-lg mb-2">Sécurité</h3>
-      <p class="text-3xl font-bold text-green-600">100%</p>
-      <p class="text-sm text-gray-600 mt-2">Niveau de sécurité</p>
-    </div>
-
-    <div class="bg-purple-50 p-4 rounded-lg shadow">
-      <h3 class="font-semibold text-lg mb-2">Dernière activité</h3>
-      <p class="text-md font-medium">Aujourd'hui</p>
-      <p class="text-sm text-gray-600 mt-2">Connexion au compte</p>
-    </div>
+<div class="dashboard">
+  <div class="page-header">
+    <h2>Mes mots de passe</h2>
+    <a href="#" class="btn-add">+ Ajouter</a>
   </div>
 
-  <div class="mt-8">
-    <a
-      href="#"
-      class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-sm focus:outline-none"
-    >
-      Ajouter un mot de passe
-    </a>
+  <div class="passwords-list">
+    <div class="empty-state">
+      <div class="empty-icon">🔐</div>
+      <h3>Aucun mot de passe enregistré</h3>
+      <p>Commencez par ajouter votre premier mot de passe</p>
+      <a href="#" class="btn-primary">Ajouter un mot de passe</a>
+    </div>
+
+    <div class="password-card" style="display: none">
+      <div class="password-info">
+        <div class="site-name">Google</div>
+        <div class="site-username">mon-email@gmail.com</div>
+      </div>
+      <div class="password-actions">
+        <button class="btn-action">Copier</button>
+        <button class="btn-action">Voir</button>
+        <button class="btn-action">Modifier</button>
+        <button class="btn-action btn-danger">Supprimer</button>
+      </div>
+    </div>
   </div>
 </div>
 {% endblock %}
