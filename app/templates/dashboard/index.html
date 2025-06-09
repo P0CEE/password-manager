@@ -1,31 +1,37 @@
-{% extends "layouts/admin_base.html" %} {% block title %}Mes mots de passe -
-Password Manager{% endblock %} {% block content %}
+{% extends "layouts/admin_base.html" %} 
+{% block title %}Mes mots de passe - Password Manager{% endblock %} 
+{% block content %}
 <div class="dashboard">
   <div class="page-header">
     <h2>Mes mots de passe</h2>
-    <a href="#" class="btn-add">+ Ajouter</a>
+    <a href="{{ url_for('main.add_password') }}" class="btn-add">+ Ajouter</a>
   </div>
 
   <div class="passwords-list">
+    {% if not passwords %}
     <div class="empty-state">
       <div class="empty-icon">🔐</div>
       <h3>Aucun mot de passe enregistré</h3>
       <p>Commencez par ajouter votre premier mot de passe</p>
-      <a href="#" class="btn-primary">Ajouter un mot de passe</a>
+      <a href="{{ url_for('main.add_password') }}" class="btn-primary">Ajouter un mot de passe</a>
     </div>
-
-    <div class="password-card" style="display: none">
+    {% else %}
+    {% for password in passwords %}
+    <div class="password-card">
       <div class="password-info">
-        <div class="site-name">Google</div>
-        <div class="site-username">mon-email@gmail.com</div>
+        <div class="site-name">{{ password.site_name }}</div>
+        <div class="site-username">{{ password.username }}</div>
       </div>
       <div class="password-actions">
-        <button class="btn-action">Copier</button>
-        <button class="btn-action">Voir</button>
-        <button class="btn-action">Modifier</button>
-        <button class="btn-action btn-danger">Supprimer</button>
+        <a href="{{ url_for('main.view_password', password_id=password.id) }}" class="btn-action">Voir</a>
+        <a href="{{ url_for('main.share_password', password_id=password.id) }}" class="btn-action">Partager</a>
+        <form action="{{ url_for('main.delete_password', password_id=password.id) }}" method="POST" style="display: inline;">
+          <button type="submit" class="btn-action btn-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce mot de passe?')">Supprimer</button>
+        </form>
       </div>
     </div>
+    {% endfor %}
+    {% endif %}
   </div>
 </div>
 {% endblock %}
