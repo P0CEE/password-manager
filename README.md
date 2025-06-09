@@ -37,7 +37,7 @@ Une application sécurisée de gestion de mots de passe développée avec Flask,
 
 1. **Cloner le dépôt**
    ```bash
-   git clone https://github.com/votre-utilisateur/password-manager.git
+   git clone https://github.com/P0CEE/password-manager.git
    cd password-manager
    ```
 
