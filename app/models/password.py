@@ -11,7 +11,7 @@ class Password(db.Model):
     username = db.Column(db.String(255), nullable=True)
     encrypted_password = db.Column(db.Text, nullable=False)
     encryption_iv = db.Column(db.Text, nullable=False)
-    encryption_key = db.Column(db.Text, nullable=False)
+    # encryption_key SUPPRIMÉ !
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -33,7 +33,6 @@ class PasswordShare(db.Model):
     
     @staticmethod
     def create_share(password_id, expiration_hours=24):
-        """Crée un nouveau partage pour un mot de passe avec un token unique"""
         share = PasswordShare(
             password_id=password_id,
             share_token=secrets.token_urlsafe(32),  
@@ -45,14 +44,12 @@ class PasswordShare(db.Model):
     
     @staticmethod
     def get_by_token(token):
-        """Récupère un partage par son token s'il est valide"""
         share = PasswordShare.query.filter_by(share_token=token).first()
         if share and share.expires_at > datetime.utcnow():
             return share
         return None
 
     def is_expired(self):
-        """Vérifie si le partage a expiré"""
         return self.expires_at <= datetime.utcnow()
         
     def __repr__(self):

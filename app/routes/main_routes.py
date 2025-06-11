@@ -1,3 +1,4 @@
+from app.models.user import User
 from flask import Blueprint, jsonify, render_template, session, redirect, url_for, request, flash, abort
 from app.models.password import Password, PasswordShare
 from app.services.password_service import generate_random_password, encrypt_password, decrypt_password
@@ -76,15 +77,20 @@ def add_password():
             flash('Le nom du site et le mot de passe sont obligatoires', 'error')
             return render_template('dashboard/add_password.html', generated_password=generated_password)
         
-        encrypted_password, encryption_iv, encryption_key = encrypt_password(password)
+        user = User.query.get(session['user_id'])
+        
+        encrypted_password, encryption_iv = encrypt_password(
+            password, 
+            user.id, 
+            user.encryption_salt
+        )
         
         new_password = Password(
             user_id=session['user_id'],
             site_name=site_name,
             username=username,
             encrypted_password=encrypted_password,
-            encryption_iv=encryption_iv,
-            encryption_key=encryption_key
+            encryption_iv=encryption_iv
         )
         
         db.session.add(new_password)
@@ -102,11 +108,13 @@ def view_password(password_id):
         return redirect(url_for('auth.login'))
     
     password_entry = Password.query.filter_by(id=password_id, user_id=session['user_id']).first_or_404()
+    user = User.query.get(session['user_id'])
     
     decrypted_password = decrypt_password(
         password_entry.encrypted_password,
         password_entry.encryption_iv,
-        password_entry.encryption_key
+        user.id,
+        user.encryption_salt
     )
     
     return render_template('dashboard/view_password.html', password=password_entry, decrypted_password=decrypted_password)
@@ -138,7 +146,6 @@ def share_password(password_id):
     if request.method == 'POST':
         expiration_hours = int(request.form.get('expiration_hours', 24))
         
-        # Créer un nouveau partage
         share = PasswordShare.create_share(password_id, expiration_hours)
         
         share_url = url_for('main.access_shared_password', token=share.share_token, _external=True)
@@ -163,10 +170,13 @@ def access_shared_password(token):
     
     password_entry = Password.query.get_or_404(share.password_id)
     
+    owner_user = User.query.get(password_entry.user_id)
+    
     decrypted_password = decrypt_password(
         password_entry.encrypted_password,
         password_entry.encryption_iv,
-        password_entry.encryption_key
+        owner_user.id,          
+        owner_user.encryption_salt  
     )
     
     remaining_time = share.expires_at - datetime.utcnow()
